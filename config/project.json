@@ -1,7 +1,7 @@
 {
     "formal":false,
     "server": {
-        "name": "morning-dairy",
+        "name": "go-seed-web",
         "addr": ":7777"
     },
     "log": {
