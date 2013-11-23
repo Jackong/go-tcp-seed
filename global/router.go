@@ -8,8 +8,8 @@ package global
 import (
 	"net/http"
 	"github.com/gorilla/mux"
-	"morning-dairy/err"
-	"morning-dairy/io/output"
+	"github.com/Jackong/go-web-seed/err"
+	"github.com/Jackong/go-web-seed/io/output"
 )
 
 type BeforeFunc func(http.ResponseWriter, *http.Request) error

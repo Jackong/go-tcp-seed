@@ -10,13 +10,13 @@ import (
 	"github.com/Jackong/log"
 	"os"
 	"fmt"
-	"morning-dairy/config"
+	"github.com/Jackong/go-web-seed/config"
 	"time"
 	"github.com/Jackong/db"
 	_ "github.com/Jackong/db/mysql"
 	"github.com/Jackong/log/writer"
 	"net/http"
-	"morning-dairy/err"
+	"github.com/Jackong/go-web-seed/err"
 )
 
 var (
@@ -100,7 +100,7 @@ func baseEnv() {
 }
 
 func loadConfig() {
-	Project = config.NewConfig(GoPath  + "/src/morning-dairy/config/project.json")
+	Project = config.NewConfig(GoPath  + "/src/github.com/Jackong/go-web-seed/config/project.json")
 }
 
 func fileLog(dir, date string, level int) log.Logger {

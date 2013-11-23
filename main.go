@@ -8,8 +8,7 @@ package main
 import (
 	"fmt"
 	"github.com/braintree/manners"
-	. "morning-dairy/global"
-	_ "morning-dairy/router/sign"
+	. "github.com/Jackong/go-web-seed/global"
 )
 
 
