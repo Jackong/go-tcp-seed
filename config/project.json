@@ -1,0 +1,35 @@
+{
+    "formal":false,
+    "server": {
+        "name": "go-seed-web",
+        "addr": ":7777"
+    },
+    "log": {
+        "dir": "log",
+        "file": {
+            "level":7
+        },
+        "email": {
+            "user":"jerkong@163.com",
+            "password":"",
+            "host":"smtp.163.com:25",
+            "to":"jerkong@163.com",
+            "subject":"Warning",
+            "level":2
+        }
+    },
+    "db": {
+        "socket":   "/var/run/mysqld/mysqld.sock",
+        "database": "test",
+        "user":     "root",
+        "password": "123456"
+    },
+    "view" : {
+        "root": "src/github.com/Jackong/gweb/view",
+        "paths": ["/js/", "/css/", "/img/", "/html/"]
+    },
+    "cookie": {
+        "hash": "12345",
+        "block": "1234567890123456"
+    }
+}
