@@ -1,7 +1,7 @@
 {
     "formal":false,
     "server": {
-        "name": "go-seed-web",
+        "name": "go-tcp-seed",
         "addr": ":7777"
     },
     "log": {
@@ -23,13 +23,5 @@
         "database": "test",
         "user":     "root",
         "password": "123456"
-    },
-    "view" : {
-        "root": "src/github.com/Jackong/gweb/view",
-        "paths": ["/js/", "/css/", "/img/", "/html/"]
-    },
-    "cookie": {
-        "hash": "12345",
-        "block": "1234567890123456"
     }
 }

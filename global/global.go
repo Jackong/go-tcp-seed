@@ -6,17 +6,14 @@
 package global
 
 import (
-	"github.com/gorilla/mux"
 	"github.com/Jackong/log"
 	"os"
 	"fmt"
-	"github.com/Jackong/go-web-seed/config"
 	"time"
 	"github.com/Jackong/db"
 	_ "github.com/Jackong/db/mysql"
 	"github.com/Jackong/log/writer"
-	"net/http"
-	"github.com/Jackong/go-web-seed/err"
+	"github.com/Jackong/go-tcp-seed/config"
 )
 
 var (
@@ -25,10 +22,8 @@ var (
 	Time func() time.Time
 	Today func() string
 	Project config.Config
-	Access *accessLog
 	Log log.Logger
 	Conn db.Database
-	Router *router
 )
 
 func init() {
@@ -42,19 +37,8 @@ func init() {
 	openDb()
 
 	fmt.Println("init router...")
-	Router = &router{mux.NewRouter()}
-	Router.NotFoundHandler = &notFoundHandler{}
 	initLog()
 }
-
-type notFoundHandler struct {
-
-}
-
-func (this *notFoundHandler) ServeHTTP(writer http.ResponseWriter, req *http.Request) {
-	panic(err.AccessError{Status: http.StatusNotFound, Msg: "page not found"})
-}
-
 func initLog() {
 	today := Today()
 	fmt.Println("getting mail log...")
@@ -62,25 +46,12 @@ func initLog() {
 
 	fileLevel := int(Project.Get("log", "file", "level").(float64))
 
-	fmt.Println("getting access log...")
-	Access = &accessLog{logger: log.MultiLogger(newDateLog(today, func(date string) log.Logger {
-				return fileLog("access", date, fileLevel)
-			}), mailLog)}
-
-
 	fmt.Println("getting action log...")
 	actionLog := newDateLog(today, func(date string) log.Logger {
 			return fileLog("action", date, fileLevel)
 		})
 
 	Log = log.MultiLogger(actionLog, mailLog)
-
-	OnBefore(logBefore)
-}
-
-func logBefore(writer http.ResponseWriter, req *http.Request) (err error) {
-	Access.Info(0, req, "access")
-	return
 }
 
 func baseEnv() {
@@ -100,7 +71,7 @@ func baseEnv() {
 }
 
 func loadConfig() {
-	Project = config.NewConfig(GoPath  + "/src/github.com/Jackong/go-web-seed/config/project.json")
+	Project = config.NewConfig(GoPath  + "/src/github.com/Jackong/go-tcp-seed/config/project.json")
 }
 
 func fileLog(dir, date string, level int) log.Logger {
