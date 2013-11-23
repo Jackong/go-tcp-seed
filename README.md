@@ -1,2 +1,2 @@
-go-web-seed
+go-tcp-seed
 ===========
