@@ -11,7 +11,6 @@ enum Code {
 
 message Response {
 	required Module module = 1;
-	required fixed32 checkSum = 2;
 	required Code code = 3;
 	optional string msg = 4;
 }

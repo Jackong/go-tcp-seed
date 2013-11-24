@@ -15,7 +15,6 @@ var _ = math.Inf
 
 type Header struct {
 	Length           *uint64 `protobuf:"fixed64,1,req,name=length" json:"length,omitempty"`
-	CheckSum         *uint32 `protobuf:"fixed32,2,req,name=checkSum" json:"checkSum,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -26,13 +25,6 @@ func (*Header) ProtoMessage()    {}
 func (m *Header) GetLength() uint64 {
 	if m != nil && m.Length != nil {
 		return *m.Length
-	}
-	return 0
-}
-
-func (m *Header) GetCheckSum() uint32 {
-	if m != nil && m.CheckSum != nil {
-		return *m.CheckSum
 	}
 	return 0
 }

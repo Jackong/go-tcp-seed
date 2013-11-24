@@ -10,6 +10,9 @@ import (
 	"code.google.com/p/goprotobuf/proto"
 )
 
+const (
+	HEADER_LENGTH = 9
+)
 type Handler interface {
 	Handle(*pb.Request) *pb.Response
 }
@@ -44,10 +47,6 @@ func HandleHeader(buf []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = checkSum(header, header.GetCheckSum())
-	if err != nil {
-		return nil, err
-	}
 	return make([]byte, header.GetLength()), err
 }
 
@@ -57,33 +56,19 @@ func handleRequest(buf []byte) (resp []byte, err error) {
 	if err != nil {
 		return resp, err
 	}
-	err = checkSum(request, request.GetCheckSum())
-	if err != nil {
-		return resp, err
-	}
 	response := Handle(request)
 	response.Module = request.Module
-	setCheckSum(response)
 	resp, err = proto.Marshal(response)
 	if err != nil {
 		Log.Alert(err)
 		newResponse := &pb.Response{Code: pb.Code_BAD_RESPONSE.Enum(), Module: request.Module}
-		setCheckSum(newResponse)
 		resp, _ = proto.Marshal(newResponse)
 	}
 	return resp , nil
 }
 
 func GetHeader(protocol []byte) []byte {
-	header := &pb.Header{Length: proto.Uint64(uint64(len(protocol))), CheckSum: proto.Uint32(264)}
+	header := &pb.Header{Length: proto.Uint64(uint64(len(protocol)))}
 	headerBuf, _ := proto.Marshal(header)
 	return headerBuf
-}
-
-func checkSum(msg proto.Message, checkSum uint32) error {
-	return nil
-}
-
-func setCheckSum(response *pb.Response) {
-	response.CheckSum = proto.Uint32(123456)
 }

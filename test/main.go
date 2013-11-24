@@ -17,7 +17,6 @@ func main() {
 	response := cln.Request(&pb.Request{
 		Module: pb.Module_SIGN_UP.Enum(),
 		Sign: &pb.Sign{Email: proto.String("email"), Password: proto.String("password")},
-		CheckSum: proto.Uint32(21321),
 	})
 	fmt.Println(response)
 }

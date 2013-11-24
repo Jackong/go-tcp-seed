@@ -54,7 +54,6 @@ func (x *Code) UnmarshalJSON(data []byte) error {
 
 type Response struct {
 	Module           *Module `protobuf:"varint,1,req,name=module,enum=pb.Module" json:"module,omitempty"`
-	CheckSum         *uint32 `protobuf:"fixed32,2,req,name=checkSum" json:"checkSum,omitempty"`
 	Code             *Code   `protobuf:"varint,3,req,name=code,enum=pb.Code" json:"code,omitempty"`
 	Msg              *string `protobuf:"bytes,4,opt,name=msg" json:"msg,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -69,13 +68,6 @@ func (m *Response) GetModule() Module {
 		return *m.Module
 	}
 	return Module_UNKNOWN
-}
-
-func (m *Response) GetCheckSum() uint32 {
-	if m != nil && m.CheckSum != nil {
-		return *m.CheckSum
-	}
-	return 0
 }
 
 func (m *Response) GetCode() Code {

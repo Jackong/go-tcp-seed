@@ -31,7 +31,7 @@ func NewClient() client {
 func (this *cln) Request(req *pb.Request) (res *pb.Response) {
 	reqBuf, _ := proto.Marshal(req)
 	length := proto.Uint64(uint64(len(reqBuf)))
-	header := &pb.Header{Length: length, CheckSum: proto.Uint32(231)}
+	header := &pb.Header{Length: length}
 	hBuf, _ := proto.Marshal(header)
 	fmt.Println("write")
 	this.Conn.Write(append(hBuf, reqBuf...))
@@ -39,12 +39,15 @@ func (this *cln) Request(req *pb.Request) (res *pb.Response) {
 	fmt.Println("read")
 	io.ReadFull(this.Conn, rb)
 	res = new(pb.Response)
-	proto.Unmarshal(rb, res)
+	err := proto.Unmarshal(rb, res)
+	if err != nil {
+		Log.Fatal(err)
+	}
 	return res
 }
 
 func resBuf(conn net.Conn) []byte {
-	var header [14]byte
+	var header [HEADER_LENGTH]byte
 	_, err := io.ReadFull(conn, header[0:])
 	if err != nil {
 		Log.Alert(err)

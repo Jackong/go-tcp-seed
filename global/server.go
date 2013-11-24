@@ -32,7 +32,7 @@ func handleClient(conn net.Conn) {
 	defer conn.Close()
 
 	for {
-		request := handleRead(conn, make([]byte, 14), HandleHeader)
+		request := handleRead(conn, make([]byte, HEADER_LENGTH), HandleHeader)
 		response := handleRead(conn, request, handleRequest)
 		header := GetHeader(response)
 		_, err := conn.Write(append(header, response...))
