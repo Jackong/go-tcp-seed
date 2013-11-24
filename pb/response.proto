@@ -1,0 +1,16 @@
+package pb;
+
+import "module.proto";
+
+enum Code {
+	OK = 0;
+	MODULE_NOT_EXIST = 1;
+	BAD_REQUEST= 2;
+}
+
+message Response {
+	required Module module = 1;
+	required int32 checkSum = 2;
+	required Code code = 3;
+	optional string msg = 4;
+}
