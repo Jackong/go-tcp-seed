@@ -75,7 +75,7 @@ func loadConfig() {
 }
 
 func fileLog(dir, date string, level int) log.Logger {
-	dir = Project.String("log", "dir") + "/" +  dir
+	dir = GoPath + "/" + Project.String("log", "dir") + "/" +  dir
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}

@@ -14,6 +14,10 @@ import (
 
 
 func main() {
+	setUp()
+}
+
+func setUp() {
 	listener, err := net.Listen("tcp", Project.String("server", "addr"))
 	if err != nil {
 		fmt.Println(err)
@@ -36,13 +40,15 @@ func handleClient(conn net.Conn) {
 
 	var buf [512]byte
 	for {
-		n, err := conn.Read(buf[0:])
+		n, err := conn.Read(buf)
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
-
+		fmt.Println("write")
 		_, err2 := conn.Write(buf[0:n])
 		if err2 != nil {
+			fmt.Println(err2)
 			return
 		}
 	}
