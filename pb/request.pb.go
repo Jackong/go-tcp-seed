@@ -16,7 +16,7 @@ var _ = math.Inf
 // module : field = n : 1
 type Request struct {
 	Module           *Module `protobuf:"varint,1,req,name=module,enum=pb.Module" json:"module,omitempty"`
-	CheckSum         *int32  `protobuf:"varint,2,req,name=checkSum" json:"checkSum,omitempty"`
+	CheckSum         *uint32 `protobuf:"fixed32,2,req,name=checkSum" json:"checkSum,omitempty"`
 	Sign             *Sign   `protobuf:"bytes,3,opt,name=sign" json:"sign,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
@@ -32,7 +32,7 @@ func (m *Request) GetModule() Module {
 	return Module_UNKNOWN
 }
 
-func (m *Request) GetCheckSum() int32 {
+func (m *Request) GetCheckSum() uint32 {
 	if m != nil && m.CheckSum != nil {
 		return *m.CheckSum
 	}

@@ -6,50 +6,24 @@
 package main
 
 import (
-	"fmt"
-	"net"
 	. "github.com/Jackong/go-tcp-seed/global"
-	"os"
+	"github.com/Jackong/go-tcp-seed/pb"
+	"fmt"
 )
 
 
 func main() {
-	setUp()
+	Register(pb.Module_SIGN_UP, &signUp{})
+	SetUp()
 }
 
-func setUp() {
-	listener, err := net.Listen("tcp", Project.String("server", "addr"))
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
-	}
+type signUp struct {
 
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
-		go handleClient(conn)
-	}
-
-	ShutDown()
 }
 
-func handleClient(conn net.Conn) {
-	defer conn.Close()
-
-	var buf [512]byte
-	for {
-		n, err := conn.Read(buf)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println("write")
-		_, err2 := conn.Write(buf[0:n])
-		if err2 != nil {
-			fmt.Println(err2)
-			return
-		}
-	}
+func (this *signUp)Handle(*pb.Request) (res *pb.Response) {
+	fmt.Println("sign up..")
+	res = new(pb.Response)
+	res.Code = pb.Code_OK.Enum()
+	return res
 }

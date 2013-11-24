@@ -1,8 +1,7 @@
 package pb;
 
 enum Module {
-	UNKNOWN = 0;
-	RESPONSE = 1;
-	SIGN_UP = 2;
-	SIGN_IN = 3;
+    UNKNOWN = 0;
+    SIGN_UP = 1;
+    SIGN_IN = 2;
 }

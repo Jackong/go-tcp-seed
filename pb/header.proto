@@ -1,0 +1,6 @@
+package pb;
+
+message Header {
+	required fixed64 length = 1;
+	required fixed32 checkSum = 2;
+}

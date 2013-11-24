@@ -19,17 +19,20 @@ const (
 	Code_OK               Code = 0
 	Code_MODULE_NOT_EXIST Code = 1
 	Code_BAD_REQUEST      Code = 2
+	Code_BAD_RESPONSE     Code = 3
 )
 
 var Code_name = map[int32]string{
 	0: "OK",
 	1: "MODULE_NOT_EXIST",
 	2: "BAD_REQUEST",
+	3: "BAD_RESPONSE",
 }
 var Code_value = map[string]int32{
 	"OK":               0,
 	"MODULE_NOT_EXIST": 1,
 	"BAD_REQUEST":      2,
+	"BAD_RESPONSE":     3,
 }
 
 func (x Code) Enum() *Code {
@@ -51,7 +54,7 @@ func (x *Code) UnmarshalJSON(data []byte) error {
 
 type Response struct {
 	Module           *Module `protobuf:"varint,1,req,name=module,enum=pb.Module" json:"module,omitempty"`
-	CheckSum         *int32  `protobuf:"varint,2,req,name=checkSum" json:"checkSum,omitempty"`
+	CheckSum         *uint32 `protobuf:"fixed32,2,req,name=checkSum" json:"checkSum,omitempty"`
 	Code             *Code   `protobuf:"varint,3,req,name=code,enum=pb.Code" json:"code,omitempty"`
 	Msg              *string `protobuf:"bytes,4,opt,name=msg" json:"msg,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
@@ -68,7 +71,7 @@ func (m *Response) GetModule() Module {
 	return Module_UNKNOWN
 }
 
-func (m *Response) GetCheckSum() int32 {
+func (m *Response) GetCheckSum() uint32 {
 	if m != nil && m.CheckSum != nil {
 		return *m.CheckSum
 	}

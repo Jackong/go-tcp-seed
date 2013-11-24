@@ -16,23 +16,20 @@ var _ = math.Inf
 type Module int32
 
 const (
-	Module_UNKNOWN  Module = 0
-	Module_RESPONSE Module = 1
-	Module_SIGN_UP  Module = 2
-	Module_SIGN_IN  Module = 3
+	Module_UNKNOWN Module = 0
+	Module_SIGN_UP Module = 1
+	Module_SIGN_IN Module = 2
 )
 
 var Module_name = map[int32]string{
 	0: "UNKNOWN",
-	1: "RESPONSE",
-	2: "SIGN_UP",
-	3: "SIGN_IN",
+	1: "SIGN_UP",
+	2: "SIGN_IN",
 }
 var Module_value = map[string]int32{
-	"UNKNOWN":  0,
-	"RESPONSE": 1,
-	"SIGN_UP":  2,
-	"SIGN_IN":  3,
+	"UNKNOWN": 0,
+	"SIGN_UP": 1,
+	"SIGN_IN": 2,
 }
 
 func (x Module) Enum() *Module {

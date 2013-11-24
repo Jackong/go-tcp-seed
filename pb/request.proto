@@ -6,6 +6,6 @@ import "sign.proto";
 //module : field = n : 1
 message Request {
 	required Module module = 1;
-	required int32 checkSum = 2;
+	required fixed32 checkSum = 2;
 	optional Sign sign = 3;
 }
