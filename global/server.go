@@ -8,7 +8,6 @@ package global
 import (
 	"net"
 	"io"
-	"fmt"
 )
 
 func SetUp() {
@@ -33,35 +32,27 @@ func handleClient(conn net.Conn) {
 	defer conn.Close()
 
 	for {
-		fmt.Println("read")
-		var header [14]byte
-		_, err := io.ReadFull(conn, header[0:])
-		if err != nil {
-			Log.Alert(err)
-			return
-		}
-		request, err := HandleHeader(header[0:])
-		if err != nil {
-			Log.Alert(err)
-			return
-		}
-		fmt.Println("read2")
-
-		_, err = io.ReadFull(conn, request[0:])
-		if err != nil {
-			Log.Alert(err)
-			return
-		}
-		resp, err := handleRequest(request)
-		if err != nil {
-			Log.Alert(err)
-			return
-		}
-		fmt.Println("write")
-		_, err = conn.Write(resp[0:])
+		request := handleRead(conn, make([]byte, 14), HandleHeader)
+		response := handleRead(conn, request, handleRequest)
+		header := GetHeader(response)
+		_, err := conn.Write(append(header, response...))
 		if err != nil {
 			Log.Alert(err)
 			return
 		}
 	}
+}
+
+func handleRead(conn net.Conn, buf []byte, handlerFunc func([]byte)([]byte, error)) []byte {
+	_, err := io.ReadFull(conn, buf)
+	if err != nil {
+		Log.Alert(err)
+		return nil
+	}
+	result, err := handlerFunc(buf)
+	if err != nil {
+		Log.Alert(err)
+		return nil
+	}
+	return result
 }

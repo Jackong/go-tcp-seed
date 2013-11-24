@@ -71,9 +71,13 @@ func handleRequest(buf []byte) (resp []byte, err error) {
 		setCheckSum(newResponse)
 		resp, _ = proto.Marshal(newResponse)
 	}
-	header := &pb.Header{Length: proto.Uint64(uint64(len(resp))), CheckSum: proto.Uint32(264)}
+	return resp , nil
+}
+
+func GetHeader(protocol []byte) []byte {
+	header := &pb.Header{Length: proto.Uint64(uint64(len(protocol))), CheckSum: proto.Uint32(264)}
 	headerBuf, _ := proto.Marshal(header)
-	return append(headerBuf, resp...) , nil
+	return headerBuf
 }
 
 func checkSum(msg proto.Message, checkSum uint32) error {
