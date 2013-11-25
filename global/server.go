@@ -29,30 +29,38 @@ func SetUp() {
 }
 
 func handleClient(conn net.Conn) {
-	defer conn.Close()
+	defer func() {
+		conn.Close()
+		if e := recover(); e != nil {
+			Log.Alert(e)
+		}
+	}()
 
 	for {
-		request := handleRead(conn, make([]byte, HEADER_LENGTH), HandleHeader)
-		response := handleRead(conn, request, handleRequest)
-		header := GetHeader(response)
-		_, err := conn.Write(append(header, response...))
-		if err != nil {
-			Log.Alert(err)
-			return
-		}
+		request := HandleRead(conn, make([]byte, HEADER_LENGTH), HandleHeader)
+		response := HandleRead(conn, request, handleRequest)
+		HandleWrite(conn, response)
 	}
 }
 
-func handleRead(conn net.Conn, buf []byte, handlerFunc func([]byte)([]byte, error)) []byte {
+func HandleRead(conn net.Conn, buf []byte, handlerFunc func([]byte)([]byte, error)) ([]byte){
 	_, err := io.ReadFull(conn, buf)
 	if err != nil {
-		Log.Alert(err)
+		panic(err)
 		return nil
 	}
 	result, err := handlerFunc(buf)
 	if err != nil {
-		Log.Alert(err)
+		panic(err)
 		return nil
 	}
 	return result
+}
+
+func HandleWrite(conn net.Conn, buf []byte) {
+	header := GetHeader(buf)
+	_, err := conn.Write(append(header, buf...))
+	if err != nil {
+		panic(err)
+	}
 }
