@@ -22,6 +22,7 @@ func SetUp() {
 			Log.Alert(err)
 			continue
 		}
+		Anonymous.Put(conn.RemoteAddr().String(), conn)
 		go handleClient(conn)
 	}
 
@@ -30,7 +31,7 @@ func SetUp() {
 
 func handleClient(conn net.Conn) {
 	defer func() {
-		conn.Close()
+		Anonymous.Close(conn.RemoteAddr().String())
 		if e := recover(); e != nil {
 			Log.Alert(e)
 		}
