@@ -22,40 +22,48 @@ func SetUp() {
 			Log.Alert(err)
 			continue
 		}
-		Anonymous.Put(conn.RemoteAddr().String(), conn)
-		go handleClient(conn)
+		connection := &Connection{Id: conn.RemoteAddr().String(), Conn: conn}
+		Anonymous.Put(connection.Id, connection)
+		go handleClient(connection)
 	}
 
 	ShutDown()
 }
 
-func handleClient(conn net.Conn) {
+func handleClient(conn *Connection) {
 	defer func() {
-		Anonymous.Close(conn.RemoteAddr().String())
+		if conn.IsSigned {
+			Signed.Close(conn.Id)
+		} else {
+			Anonymous.Close(conn.Id)
+		}
 		if e := recover(); e != nil {
 			Log.Alert(e)
 		}
 	}()
 
 	for {
-		request := HandleRead(conn, make([]byte, HEADER_LENGTH), HandleHeader)
-		response := HandleRead(conn, request, handleRequest)
+		header := make([]byte, HEADER_LENGTH)
+		HandleRead(conn, header)
+		request, err := HandleHeader(header)
+		if err != nil {
+			panic(err)
+		}
+		HandleRead(conn, request)
+		response, err := handleRequest(request, conn)
+		if err != nil {
+			panic(err)
+		}
 		HandleWrite(conn, response)
 	}
 }
 
-func HandleRead(conn net.Conn, buf []byte, handlerFunc func([]byte)([]byte, error)) ([]byte){
+func HandleRead(conn net.Conn, buf []byte) {
 	_, err := io.ReadFull(conn, buf)
 	if err != nil {
 		panic(err)
-		return nil
+		return
 	}
-	result, err := handlerFunc(buf)
-	if err != nil {
-		panic(err)
-		return nil
-	}
-	return result
 }
 
 func HandleWrite(conn net.Conn, buf []byte) {

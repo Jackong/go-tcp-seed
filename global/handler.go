@@ -14,7 +14,7 @@ const (
 	HEADER_LENGTH = 9
 )
 type Handler interface {
-	Handle(*pb.Request) *pb.Response
+	Handle(*pb.Request, *Connection) *pb.Response
 }
 
 var (
@@ -29,7 +29,7 @@ func Register(module pb.Module, handler Handler) {
 	handlers[module] = handler
 }
 
-func Handle(request *pb.Request) (resp *pb.Response) {
+func Handle(request *pb.Request, conn *Connection) (resp *pb.Response) {
 	module := request.GetModule()
 	handler, ok := handlers[module]
 	if !ok {
@@ -38,7 +38,7 @@ func Handle(request *pb.Request) (resp *pb.Response) {
 		resp.Code = pb.Code_MODULE_NOT_EXIST.Enum()
 		return
 	}
-	return handler.Handle(request)
+	return handler.Handle(request, conn)
 }
 
 func HandleHeader(buf []byte) ([]byte, error) {
@@ -50,13 +50,13 @@ func HandleHeader(buf []byte) ([]byte, error) {
 	return make([]byte, header.GetLength()), err
 }
 
-func handleRequest(buf []byte) (resp []byte, err error) {
+func handleRequest(buf []byte, conn *Connection) (resp []byte, err error) {
 	request := &pb.Request{}
 	err = proto.Unmarshal(buf, request)
 	if err != nil {
 		return resp, err
 	}
-	response := Handle(request)
+	response := Handle(request, conn)
 	response.Module = request.Module
 	resp, err = proto.Marshal(response)
 	if err != nil {

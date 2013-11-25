@@ -21,9 +21,10 @@ type signUp struct {
 
 }
 
-func (this *signUp)Handle(*pb.Request) (res *pb.Response) {
+func (this *signUp)Handle(req *pb.Request, conn *Connection) (res *pb.Response) {
 	fmt.Println("sign up..")
-	res = new(pb.Response)
-	res.Code = pb.Code_OK.Enum()
+	sign := req.GetSign()
+	SignIn(conn.Id, sign.GetEmail())
+	res = &pb.Response{Code: pb.Code_OK.Enum()}
 	return res
 }

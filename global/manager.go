@@ -5,12 +5,8 @@
  */
 package global
 
-import (
-	"net"
-)
-
 type manager struct {
-	connections map[string]net.Conn
+	connections map[string]*Connection
 }
 var (
 	Anonymous *manager
@@ -18,19 +14,19 @@ var (
 )
 
 func init() {
-	Anonymous = &manager{connections: make(map[string]net.Conn)}
-	Signed = &manager{connections: make(map[string]net.Conn)}
+	Anonymous = &manager{connections: make(map[string]*Connection)}
+	Signed = &manager{connections: make(map[string]*Connection)}
 	OnShutDown(func() {
 		Anonymous.CloseAll()
 		Signed.CloseAll()
 	})
 }
 
-func (this *manager) Get(id string) net.Conn {
+func (this *manager) Get(id string) *Connection {
 	return this.connections[id]
 }
 
-func (this *manager) Put(id string, conn net.Conn) {
+func (this *manager) Put(id string, conn *Connection) {
 	this.Close(id)
 	this.connections[id] = conn
 }
@@ -58,7 +54,17 @@ func SignIn(aid, sid string) bool {
 	if conn == nil {
 		return false
 	}
+	conn.IsSigned = true
 	Signed.Put(sid, conn)
 	return true
 }
 
+func SignOut(sid, aid string) bool {
+	conn := Signed.Get(sid)
+	if conn == nil {
+		return false
+	}
+	conn.IsSigned = false
+	Anonymous.Put(aid, conn)
+	return true
+}
