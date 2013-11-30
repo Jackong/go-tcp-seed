@@ -21,20 +21,19 @@ type HandlerFunc func(*pb.Request, *pb.Response, *Connection) error
 func (this HandlerFunc) Handle(req *pb.Request, resp *pb.Response, conn *Connection) error {
 	return this(req, resp, conn)
 }
-type AfterFunc func(*pb.Response)
 type WrapHandler struct {
 	Handler
-	beforeHandlers []HandlerFunc
-	afterHandlers []AfterFunc
+	beforeFuncs []HandlerFunc
+	afterFuncs []HandlerFunc
 }
 
 func (this *WrapHandler) Handle(req *pb.Request, resp *pb.Response, conn *Connection) error {
-	for _, beforeHandler := range this.beforeHandlers {
-		err := beforeHandler(req, resp, conn)
+	for _, beforeFunc := range this.beforeFuncs {
+		err := beforeFunc(req, resp, conn)
 		if err != nil {
 			return err
 		}
-		if resp.Code.String() != pb.Code_OK.String() {
+		if resp.Code != nil {
 			return nil
 		}
 	}
@@ -44,19 +43,19 @@ func (this *WrapHandler) Handle(req *pb.Request, resp *pb.Response, conn *Connec
 		return err
 	}
 
-	for _, afterFunc := range this.afterHandlers {
-		afterFunc(resp)
+	for _, afterFunc := range this.afterFuncs {
+		afterFunc(req, resp, conn)
 	}
 	return nil
 }
 
 func (this *WrapHandler) Before(beforeHandlers ...HandlerFunc) *WrapHandler{
-	this.beforeHandlers = append(this.beforeHandlers, beforeHandlers...)
+	this.beforeFuncs = append(this.beforeFuncs, beforeHandlers...)
 	return this
 }
 
-func (this *WrapHandler) After(afterHandlers ...AfterFunc) *WrapHandler {
-	this.afterHandlers = append(this.afterHandlers, afterHandlers...)
+func (this *WrapHandler) After(afterHandlers ...HandlerFunc) *WrapHandler {
+	this.afterFuncs = append(this.afterFuncs, afterHandlers...)
 	return this
 }
 
@@ -68,8 +67,14 @@ func init() {
 	handlers = make(map[pb.Module] Handler)
 }
 
-func Register(module pb.Module, handler Handler) *WrapHandler{
+func Attach(module pb.Module, handler Handler) *WrapHandler{
 	wrapHandler := &WrapHandler{Handler: handler}
+	handlers[module] = wrapHandler
+	return wrapHandler
+}
+
+func AttachFunc(module pb.Module, handlerFunc HandlerFunc) *WrapHandler{
+	wrapHandler := &WrapHandler{Handler: handlerFunc}
 	handlers[module] = wrapHandler
 	return wrapHandler
 }

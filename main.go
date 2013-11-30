@@ -13,9 +13,14 @@ import (
 
 
 func main() {
-	Register(pb.Module_SIGN_UP, &signUp{}).Before(func(req *pb.Request, res *pb.Response, conn *Connection) error {
+	AttachFunc(pb.Module_SIGN_UP, func(req *pb.Request, res *pb.Response, conn *Connection) error {
+			fmt.Println("sign up...")
+			sign := req.GetSign()
+			SignIn(conn.Id, sign.GetEmail())
+			res.Code = pb.Code_OK.Enum()
+			return nil
+		}).Before(func(req *pb.Request, res *pb.Response, conn *Connection) error {
 		fmt.Println("aha!")
-		res.Code = pb.Code_BAD_RESPONSE.Enum()
 		return nil
 	})
 	SetUp()
