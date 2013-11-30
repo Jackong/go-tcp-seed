@@ -13,7 +13,10 @@ import (
 
 
 func main() {
-	Register(pb.Module_SIGN_UP, &signUp{})
+	Register(pb.Module_SIGN_UP, &signUp{}).Before(func(req *pb.Request, conn *Connection) (res *pb.Response) {
+		fmt.Println("aha!")
+		return &pb.Response{Code: pb.Code_BAD_REQUEST.Enum()}
+	})
 	SetUp()
 }
 

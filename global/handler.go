@@ -17,6 +17,42 @@ type Handler interface {
 	Handle(*pb.Request, *Connection) *pb.Response
 }
 
+type HandlerFunc func(*pb.Request, *Connection) *pb.Response
+func (this HandlerFunc) Handle(req *pb.Request, conn *Connection) *pb.Response {
+	return this(req, conn)
+}
+type AfterFunc func(*pb.Response)
+type WrapHandler struct {
+	Handler
+	beforeHandlers []HandlerFunc
+	afterHandlers []AfterFunc
+}
+
+func (this *WrapHandler) Handle(req *pb.Request, conn *Connection) *pb.Response {
+	for _, beforeHandler := range this.beforeHandlers {
+		if resp := beforeHandler(req, conn); resp != nil {
+			return resp
+		}
+	}
+
+	resp := this.Handler.Handle(req, conn)
+
+	for _, afterFunc := range this.afterHandlers {
+		afterFunc(resp)
+	}
+	return resp
+}
+
+func (this *WrapHandler) Before(beforeHandlers ...HandlerFunc) *WrapHandler{
+	this.beforeHandlers = append(this.beforeHandlers, beforeHandlers...)
+	return this
+}
+
+func (this *WrapHandler) After(afterHandlers ...AfterFunc) *WrapHandler {
+	this.afterHandlers = append(this.afterHandlers, afterHandlers...)
+	return this
+}
+
 var (
 	handlers map[pb.Module] Handler
 )
@@ -25,8 +61,10 @@ func init() {
 	handlers = make(map[pb.Module] Handler)
 }
 
-func Register(module pb.Module, handler Handler) {
-	handlers[module] = handler
+func Register(module pb.Module, handler Handler) *WrapHandler{
+	wrapHandler := &WrapHandler{Handler: handler}
+	handlers[module] = wrapHandler
+	return wrapHandler
 }
 
 func Handle(request *pb.Request, conn *Connection) (resp *pb.Response) {
