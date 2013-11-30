@@ -5,15 +5,11 @@
  */
 package err
 
-type AccessError struct {
-	Status int
+type HandlerError struct {
+	Code int32
 	Msg string
 }
 
-func (this AccessError) Error() string{
+func (this HandlerError) Error() string{
     return this.Msg
 }
-
-const (
-	CODE_OK = 0
-)

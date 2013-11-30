@@ -7,6 +7,7 @@ enum Code {
 	MODULE_NOT_EXIST = 1;
 	BAD_REQUEST = 2;
 	BAD_RESPONSE = 3;
+	CAN_NOT_HANDLE = 4;
 }
 
 message Response {

@@ -14,12 +14,12 @@ const (
 	HEADER_LENGTH = 9
 )
 type Handler interface {
-	Handle(*pb.Request, *Connection) *pb.Response
+	Handle(*pb.Request, *pb.Response, *Connection) error
 }
 
-type HandlerFunc func(*pb.Request, *Connection) *pb.Response
-func (this HandlerFunc) Handle(req *pb.Request, conn *Connection) *pb.Response {
-	return this(req, conn)
+type HandlerFunc func(*pb.Request, *pb.Response, *Connection) error
+func (this HandlerFunc) Handle(req *pb.Request, resp *pb.Response, conn *Connection) error {
+	return this(req, resp, conn)
 }
 type AfterFunc func(*pb.Response)
 type WrapHandler struct {
@@ -28,19 +28,26 @@ type WrapHandler struct {
 	afterHandlers []AfterFunc
 }
 
-func (this *WrapHandler) Handle(req *pb.Request, conn *Connection) *pb.Response {
+func (this *WrapHandler) Handle(req *pb.Request, resp *pb.Response, conn *Connection) error {
 	for _, beforeHandler := range this.beforeHandlers {
-		if resp := beforeHandler(req, conn); resp != nil {
-			return resp
+		err := beforeHandler(req, resp, conn)
+		if err != nil {
+			return err
+		}
+		if resp.Code.String() != pb.Code_OK.String() {
+			return nil
 		}
 	}
 
-	resp := this.Handler.Handle(req, conn)
+	err := this.Handler.Handle(req, resp, conn)
+	if err != nil {
+		return err
+	}
 
 	for _, afterFunc := range this.afterHandlers {
 		afterFunc(resp)
 	}
-	return resp
+	return nil
 }
 
 func (this *WrapHandler) Before(beforeHandlers ...HandlerFunc) *WrapHandler{
@@ -67,16 +74,15 @@ func Register(module pb.Module, handler Handler) *WrapHandler{
 	return wrapHandler
 }
 
-func Handle(request *pb.Request, conn *Connection) (resp *pb.Response) {
+func Handle(request *pb.Request, response *pb.Response, conn *Connection) error {
 	module := request.GetModule()
 	handler, ok := handlers[module]
 	if !ok {
-		resp = new(pb.Response)
-		Log.Alert("could not found this module", module)
-		resp.Code = pb.Code_MODULE_NOT_EXIST.Enum()
-		return
+		response = &pb.Response{Code: pb.Code_MODULE_NOT_EXIST.Enum()}
+		Log.Alertf("%v request not exist module %v with %v", conn.Conn.RemoteAddr(), module, request)
+		return nil
 	}
-	return handler.Handle(request, conn)
+	return handler.Handle(request, response, conn)
 }
 
 func HandleHeader(buf []byte) ([]byte, error) {
@@ -94,7 +100,12 @@ func handleRequest(buf []byte, conn *Connection) (resp []byte, err error) {
 	if err != nil {
 		return resp, err
 	}
-	response := Handle(request, conn)
+	response := &pb.Response{}
+	err = Handle(request, response, conn)
+	if err != nil {
+		Log.Alert(err)
+		response.Code = pb.Code_BAD_REQUEST.Enum()
+	}
 	response.Module = request.Module
 	resp, err = proto.Marshal(response)
 	if err != nil {
